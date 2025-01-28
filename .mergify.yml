@@ -1,9 +1,11 @@
 queue_rules:
   - name: default
-    conditions:
+    merge_conditions:
       # Conditions to get out of the queue (= merged)
       - status-success=Run Unit Tests
       - status-success=Semantic Pull Request
+      - status-success=Analyze (javascript)
+    merge_method: squash
 
 pull_request_rules:
   - name: Automatically merge on CI success and review approval
@@ -14,6 +16,7 @@ pull_request_rules:
       - -approved-reviews-by~=author
       - status-success=Run Unit Tests
       - status-success=Semantic Pull Request
+      - status-success=Analyze (javascript)
       - label!=work-in-progress
       - -title~=(WIP|wip)
       - -merged
@@ -21,7 +24,6 @@ pull_request_rules:
       - author!=dependabot[bot]
     actions:
       queue:
-        method: squash
         name: default
 
   - name: Automatically approve and merge Dependabot PRs
@@ -30,6 +32,7 @@ pull_request_rules:
       - author=dependabot[bot]
       - status-success=Run Unit Tests
       - status-success=Semantic Pull Request
+      - status-success=Analyze (javascript)
       - -title~=(WIP|wip)
       - -label~=(blocked|do-not-merge)
       - -merged
@@ -38,5 +41,4 @@ pull_request_rules:
       review:
         type: APPROVE
       queue:
-        method: squash
         name: default
