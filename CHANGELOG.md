@@ -2,6 +2,91 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.3.0](https://github.com/aws-actions/amazon-ecs-deploy-task-definition/compare/v2.2.0...v2.3.0) (2025-01-30)
+
+
+### Features
+
+* Add support for 'VolumeConfigurations' property on both UpdateService and RunTask API call ([#721](https://github.com/aws-actions/amazon-ecs-deploy-task-definition/issues/721)) ([0bad458](https://github.com/aws-actions/amazon-ecs-deploy-task-definition/commit/0bad458c6aa901707e510cd05b797b05da075633))
+
+## [2.2.0](https://github.com/aws-actions/amazon-ecs-deploy-task-definition/compare/v2.1.2...v2.2.0) (2024-12-06)
+
+
+### Features
+
+* add run-task-capacity-provider-strategy input ([#661](https://github.com/aws-actions/amazon-ecs-deploy-task-definition/issues/661)) ([6ebedf4](https://github.com/aws-actions/amazon-ecs-deploy-task-definition/commit/6ebedf489a59397e203a34a9cb7f85c8e303142c))
+
+
+### Bug Fixes
+
+* when no input enableECSManagedTagsInput, not include it to request params ([#669](https://github.com/aws-actions/amazon-ecs-deploy-task-definition/issues/669)) ([e4558ed](https://github.com/aws-actions/amazon-ecs-deploy-task-definition/commit/e4558ed83a830c66b168104c883a31784769e99c)), closes [#682](https://github.com/aws-actions/amazon-ecs-deploy-task-definition/issues/682) [#683](https://github.com/aws-actions/amazon-ecs-deploy-task-definition/issues/683) [#681](https://github.com/aws-actions/amazon-ecs-deploy-task-definition/issues/681) [#679](https://github.com/aws-actions/amazon-ecs-deploy-task-definition/issues/679)
+
+### [2.1.2](https://github.com/aws-actions/amazon-ecs-deploy-task-definition/compare/v2.1.1...v2.1.2) (2024-10-24)
+
+### [2.1.1](https://github.com/aws-actions/amazon-ecs-deploy-task-definition/compare/v2.1.0...v2.1.1) (2024-10-03)
+
+## [2.1.0](https://github.com/aws-actions/amazon-ecs-deploy-task-definition/compare/v2.0.0...v2.1.0) (2024-09-05)
+
+
+### Features
+
+* Enable AWS managed tags ([#622](https://github.com/aws-actions/amazon-ecs-deploy-task-definition/issues/622)) ([5ae7be6](https://github.com/aws-actions/amazon-ecs-deploy-task-definition/commit/5ae7be6fcfec491494b3dbe937800837321d81d9))
+* Tags for services and ad-hoc run ([#629](https://github.com/aws-actions/amazon-ecs-deploy-task-definition/issues/629)) ([1b137d4](https://github.com/aws-actions/amazon-ecs-deploy-task-definition/commit/1b137d48136614359c0c3a573120ab771daa6320))
+
+
+### Bug Fixes
+
+* set networkConfiguration to null when using bridge network mode ([#617](https://github.com/aws-actions/amazon-ecs-deploy-task-definition/issues/617)) ([0a1e247](https://github.com/aws-actions/amazon-ecs-deploy-task-definition/commit/0a1e24711a61a2279b2bf40c6877fdbfd117997e))
+
+## [2.0.0](https://github.com/aws-actions/amazon-ecs-deploy-task-definition/compare/v1.6.0...v2.0.0) (2024-08-06)
+
+
+### ⚠ BREAKING CHANGES
+
+* AWS SDK v3 upgrade contains some backward incompatible changes.
+
+### Features
+
+* add ad-hoc task runs ([#304](https://github.com/aws-actions/amazon-ecs-deploy-task-definition/issues/304)) ([b3a528e](https://github.com/aws-actions/amazon-ecs-deploy-task-definition/commit/b3a528eb690c86037acd19fd6a2a86337f4e3657))
+* add new parameters and tests to one-off task feature ([#593](https://github.com/aws-actions/amazon-ecs-deploy-task-definition/issues/593)) ([67393b6](https://github.com/aws-actions/amazon-ecs-deploy-task-definition/commit/67393b6dddfbf0653b20b162dcdd0d3821366bc4))
+* Add CodeDeploy deployment config name parameter ([4b15394](https://github.com/aws-actions/amazon-ecs-deploy-task-definition/commit/4b153949000fb656721f5a776216cb7e446d9f98))
+
+### Bug Fixes
+
+* Link to events v2 url ([#588](https://github.com/aws-actions/amazon-ecs-deploy-task-definition/issues/588)) ([1a69dae](https://github.com/aws-actions/amazon-ecs-deploy-task-definition/commit/1a69daea10712415b65b5c90f8c41b1b6b556ab5))
+* pass maxWaitTime in seconds ([b5c6c3f](https://github.com/aws-actions/amazon-ecs-deploy-task-definition/commit/b5c6c3fcbdf37b6f40a448364f91bfa3f824e3d0))
+* waiter options ([a15de3c](https://github.com/aws-actions/amazon-ecs-deploy-task-definition/commit/a15de3cf6c410374c35333dbbf96b183206ac0b7))
+
+## [1.6.0](https://github.com/aws-actions/amazon-ecs-deploy-task-definition/compare/v1.5.0...v1.6.0) (2024-07-18)
+
+### Please note that this is a backward incompatible release with the upgrade to AWS SDK v3. We recommend using v2 of this Github action which includes the SDK upgrade, and update your task definition parameters to adhere to the specification defined in AWS documentation [here](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task_definition_parameters.html).
+### Features
+
+* Add CodeDeploy deployment config name parameter ([4b15394](https://github.com/aws-actions/amazon-ecs-deploy-task-definition/commit/4b153949000fb656721f5a776216cb7e446d9f98))
+
+
+### Bug Fixes
+
+* pass maxWaitTime in seconds ([b5c6c3f](https://github.com/aws-actions/amazon-ecs-deploy-task-definition/commit/b5c6c3fcbdf37b6f40a448364f91bfa3f824e3d0))
+* waiter options ([a15de3c](https://github.com/aws-actions/amazon-ecs-deploy-task-definition/commit/a15de3cf6c410374c35333dbbf96b183206ac0b7))
+
+## [1.5.0](https://github.com/aws-actions/amazon-ecs-deploy-task-definition/compare/v1.4.11...v1.5.0) (2024-05-07)
+
+
+### Features
+
+* Add desired tasks ([#505](https://github.com/aws-actions/amazon-ecs-deploy-task-definition/issues/505)) ([e5f78d3](https://github.com/aws-actions/amazon-ecs-deploy-task-definition/commit/e5f78d3088b0f4f96faca249870440a0001deaa3))
+
+### [1.4.11](https://github.com/aws-actions/amazon-ecs-deploy-task-definition/compare/v1.4.10...v1.4.11) (2023-01-04)
+
+### [1.4.10](https://github.com/aws-actions/amazon-ecs-deploy-task-definition/compare/v1.4.9...v1.4.10) (2022-09-30)
+
+
+### Bug Fixes
+
+* support new 'ECS' deployment type rather than relying on a null value ([#387](https://github.com/aws-actions/amazon-ecs-deploy-task-definition/issues/387)) ([b74b034](https://github.com/aws-actions/amazon-ecs-deploy-task-definition/commit/b74b034038701c2a78e7715e68f28b8fd49a14c7))
+* Use correct host for China region console ([#309](https://github.com/aws-actions/amazon-ecs-deploy-task-definition/issues/309)) ([bfe35b5](https://github.com/aws-actions/amazon-ecs-deploy-task-definition/commit/bfe35b582b00dd351d71abc7af67f91e493c0802))
+
 ### [1.4.9](https://github.com/aws-actions/amazon-ecs-deploy-task-definition/compare/v1.4.8...v1.4.9) (2022-01-18)
 
 

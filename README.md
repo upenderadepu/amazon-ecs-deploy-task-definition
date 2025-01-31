@@ -22,7 +22,7 @@ Registers an Amazon ECS task definition and deploys it to an ECS service.
 
 ```yaml
     - name: Deploy to Amazon ECS
-      uses: aws-actions/amazon-ecs-deploy-task-definition@v1
+      uses: aws-actions/amazon-ecs-deploy-task-definition@v2
       with:
         task-definition: task-definition.json
         service: my-service
@@ -31,6 +31,8 @@ Registers an Amazon ECS task definition and deploys it to an ECS service.
 ```
 
 See [action.yml](action.yml) for the full documentation for this action's inputs and outputs.
+In most cases when running a one-off task, subnet ID's, subnet groups, and assign public IP will be required. 
+Assign public IP will only be applied when a subnet or security group is defined. 
 
 ### Task definition file
 
@@ -83,7 +85,7 @@ The task definition file can be updated prior to deployment with the new contain
       run: |
         docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
         docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
-        echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
+        echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
 
     - name: Fill in the new image ID in the Amazon ECS task definition
       id: task-def
@@ -94,12 +96,84 @@ The task definition file can be updated prior to deployment with the new contain
         image: ${{ steps.build-image.outputs.image }}
 
     - name: Deploy Amazon ECS task definition
-      uses: aws-actions/amazon-ecs-deploy-task-definition@v1
+      uses: aws-actions/amazon-ecs-deploy-task-definition@v2
       with:
         task-definition: ${{ steps.task-def.outputs.task-definition }}
         service: my-service
         cluster: my-cluster
         wait-for-service-stability: true
+```
+
+### Tags
+
+To turn on [Amazon ECS-managed tags](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/ecs-using-tags.html#managed-tags) `aws:ecs:serviceName` and `aws:ecs:clusterName` for the tasks in the service or the standalone tasks by setting `enable-ecs-managed-tags`:
+
+```yaml
+      - name: Deploy Amazon ECS task definition
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v2
+        with:
+          task-definition: task-definition.json
+          service: my-service
+          cluster: my-cluster
+          wait-for-service-stability: true
+          enable-ecs-managed-tags: true
+```
+
+You can propagate your custom tags from your existing service using `propagate-tags`:
+
+```yaml
+      - name: Deploy Amazon ECS task definition
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v2
+        with:
+          task-definition: task-definition.json
+          service: my-service
+          cluster: my-cluster
+          wait-for-service-stability: true
+          propagate-tags: SERVICE
+```
+
+### EBS Volume Configuration
+This action supports configuring Amazon EBS volumes for both services and standalone tasks.
+
+For Services (Update Service):
+
+```yaml
+    - name: Deploy to Amazon ECS with EBS Volume
+      uses: aws-actions/amazon-ecs-deploy-task-definition@v2
+      with:
+        task-definition: task-definition.json
+        service: my-service
+        cluster: my-cluster
+        wait-for-service-stability: true
+        service-managed-ebs-volume-name: "ebs1"
+        service-managed-ebs-volume: '{"sizeInGiB": 30, "volumeType": "gp3", "encrypted": true, "roleArn":"arn:aws:iam::<account-id>:role/ebs-role"}'
+```
+
+Note: Your task definition must include a volume that is configuredAtLaunch:
+
+```json
+    ...
+    "volumes": [
+        {
+            "name": "ebs1",
+            "configuredAtLaunch": true
+        }
+    ],
+    ...
+```
+
+For Standalone Tasks (RunTask):
+
+```yaml
+    - name: Deploy to Amazon ECS
+      uses: aws-actions/amazon-ecs-deploy-task-definition@v2
+      with:
+        task-definition: task-definition.json
+        cluster: my-cluster
+        run-task: true
+        run-task-launch-type: EC2
+        run-task-managed-ebs-volume-name: "ebs1"
+        run-task-managed-ebs-volume: '{"filesystemType":"xfs", "roleArn":"arn:aws:iam::<account-id>:role/github-actions-setup-stack-EBSRole-YwVmgS4g7gQE", "encrypted":false, "sizeInGiB":30}'
 ```
 
 ## Credentials and Region
@@ -116,8 +190,7 @@ We recommend following [Amazon IAM best practices](https://docs.aws.amazon.com/I
 
 ## Permissions
 
-This action requires the following minimum set of permissions:
-
+Running a service requires the following minimum set of permissions:
 ```json
 {
    "Version":"2012-10-17",
@@ -155,7 +228,36 @@ This action requires the following minimum set of permissions:
    ]
 }
 ```
-
+ 
+Running a one-off/stand-alone task requires the following minimum set of permissions:
+```json
+{
+   "Version": "2012-10-17",
+   "Statement":[
+      {
+         "Sid": "VisualEditor0",
+         "Effect": "Allow",
+         "Action":[
+            "ecs:RunTask",
+            "ecs:RegisterTaskDefinition",
+            "ecs:DescribeTasks"
+         ],
+         "Resource": "*"
+      },
+      {
+         "Sid": "PassRolesInTaskDefinition",
+         "Effect":"Allow",
+         "Action":[
+            "iam:PassRole"
+         ],
+         "Resource":[
+            "arn:aws:iam::<aws_account_id>:role/<task_definition_task_role_name>",
+            "arn:aws:iam::<aws_account_id>:role/<task_definition_task_execution_role_name>"
+         ]
+      }
+   ]
+}
+```
 Note: the policy above assumes the account has opted in to the ECS long ARN format.
 
 ## AWS CodeDeploy Support
@@ -164,7 +266,7 @@ For ECS services that uses the `CODE_DEPLOY` deployment controller, additional c
 
 ```yaml
     - name: Deploy to Amazon ECS
-      uses: aws-actions/amazon-ecs-deploy-task-definition@v1
+      uses: aws-actions/amazon-ecs-deploy-task-definition@v2
       with:
         task-definition: task-definition.json
         service: my-service
@@ -222,6 +324,48 @@ The minimal permissions require access to CodeDeploy:
 }
 ```
 
+## Running Tasks
+
+For services which need an initialization task, such as database migrations, or ECS tasks that are run without a service, additional configuration can be added to trigger an ad-hoc task run. When combined with GitHub Action's `on: schedule` triggers, runs can also be scheduled without EventBridge.
+
+In the following example, the service would not be updated until the ad-hoc task exits successfully.
+
+```yaml
+    - name: Deploy to Amazon ECS
+      uses: aws-actions/amazon-ecs-deploy-task-definition@v2
+      with:
+        task-definition: task-definition.json
+        service: my-service
+        cluster: my-cluster
+        wait-for-service-stability: true
+        run-task: true
+        wait-for-task-stopped: true
+```
+
+Overrides and VPC networking options are available as well. See [action.yml](action.yml) for more details. The `FARGATE` 
+launch type requires `awsvpc` network mode in your task definition and you must specify a network configuration.
+
+### Tags
+
+To tag your tasks:
+
+* to turn on Amazon ECS-managed tags (`aws:ecs:clusterName`), use `enable-ecs-managed-tags`
+* for custom tags, use `run-task-tags`
+
+```yaml
+    - name: Deploy to Amazon ECS
+      uses: aws-actions/amazon-ecs-deploy-task-definition@v2
+      with:
+        task-definition: task-definition.json
+        service: my-service
+        cluster: my-cluster
+        wait-for-service-stability: true
+        run-task: true
+        enable-ecs-managed-tags: true
+        run-task-tags: '[{"key": "project", "value": "myproject"}]'
+        wait-for-task-stopped: true
+```
+
 ## Troubleshooting
 
 This action emits debug logs to help troubleshoot deployment failures.  To see the debug logs, create a secret named `ACTIONS_STEP_DEBUG` with value `true` in your repository.
@@ -233,3 +377,4 @@ This code is made available under the MIT license.
 ## Security Disclosures
 
 If you would like to report a potential security issue in this project, please do not create a GitHub issue.  Instead, please follow the instructions [here](https://aws.amazon.com/security/vulnerability-reporting/) or [email AWS security directly](mailto:aws-security@amazon.com).
+
